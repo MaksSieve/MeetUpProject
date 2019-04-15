@@ -6,6 +6,7 @@ import io.gatling.http.protocol.HttpProtocolBuilder
 import io.gatling.http.request.builder.HttpRequestBuilder
 
 import scala.concurrent.duration._
+import scala.util.Random
 
 class AdvancedTest1 extends Simulation{
 
@@ -25,13 +26,14 @@ class AdvancedTest1 extends Simulation{
   val GetByEmail: HttpRequestBuilder = http("GetByEmail")
     .get("/get/email")
     .queryParam("email", "${email}")
+    .check(jsonPath("$.name") saveAs "name")
 
   val Add: HttpRequestBuilder = http("Add")
     .post("/add")
     .body(ElFileBody("templates/add.json")).asJson
 
 
-  val AdvancedScenario: ScenarioBuilder = scenario("AdvancedScenario")
+  val AdvancedScenario1: ScenarioBuilder = scenario("AdvancedScenario1")
       .randomSwitch(
         0.01 -> feed(adds).exec(Add),
         99.99 -> exec(
@@ -44,10 +46,39 @@ class AdvancedTest1 extends Simulation{
       )
 
 
+  val AdvancedScenario2: ScenarioBuilder = scenario("AdvancedScenario2")
+      .forever(
+        pace(30)
+          .feed(olds)
+          .exec(GetByEmail)
+          .exec(GetByName)
+          .exec(session => {
+            val name = session("name").as[String]
+            val surname = session("surname").as[String]
+            val new_surname = Random.shuffle((name + surname).toList).mkString("")
+            session.set("surname", new_surname)
+          })
+          .exec(session => {
+            val surname = session("surname").as[String]
+            session.set("email", surname + "@email.ru")
+          })
+          .exec(Add)
+      )
+
   setUp(
-    AdvancedScenario.inject(
-      rampUsersPerSec(0) to 1 during (10 seconds),
-      constantUsersPerSec(1) during (5 minutes)
+    AdvancedScenario1.inject(
+      incrementUsersPerSec(1) // Double
+        .times(5)
+        .eachLevelLasting(30 seconds)
+        .separatedByRampsLasting(10 seconds)
+        .startingFrom(0) // Double
+    ).protocols(httpConf),
+    AdvancedScenario2.inject(
+      incrementConcurrentUsers(1) // Int
+        .times(5)
+        .eachLevelLasting(30 seconds)
+        .separatedByRampsLasting(10 seconds)
+        .startingFrom(0) // Int
     ).protocols(httpConf)
-  ).maxDuration(6 minutes)
+  ).maxDuration(5 minutes)
 }
