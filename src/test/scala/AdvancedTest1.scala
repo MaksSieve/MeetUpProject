@@ -39,8 +39,12 @@ class AdvancedTest1 extends Simulation{
         99.99 -> exec(
           feed(olds)
           .randomSwitch(
-            50.0 -> exec(GetByEmail).randomSwitch(1.0 -> feed(adds).exec(Add)),
-            50.0 -> exec(GetByName).randomSwitch(30.0 -> exec(GetByEmail).randomSwitch(20.0 -> feed(adds).exec(Add)))
+            50.0 -> exec(GetByEmail).doIf("${name}" == "Ivan")(feed(adds).exec(Add)),
+            50.0 -> exec(GetByName).randomSwitch(
+              30.0 -> exec(GetByEmail).randomSwitch(
+                20.0 -> feed(adds).exec(Add)
+              )
+            )
           )
         )
       )
