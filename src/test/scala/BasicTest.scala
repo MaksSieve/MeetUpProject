@@ -37,6 +37,6 @@ class BasicTest extends Simulation{
         .to(5)
         .during(10 seconds)
     ).protocols(httpConf)
-  ).maxDuration(190 seconds)
+  ).maxDuration(60 seconds)
 
 }

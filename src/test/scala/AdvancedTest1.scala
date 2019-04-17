@@ -82,4 +82,9 @@ class AdvancedTest1 extends Simulation{
         .startingFrom(5) // Int
     ).protocols(httpConf)
   ).maxDuration(1.5 minute)
+    .assertions(
+      forAll.failedRequests.percent.lt(5.0),
+      details("Closed").responseTime.percentile(.95).lt(1500),
+      details("Open / GetByEmail").successfulRequests.percent.gt(99.99)
+    )
 }
