@@ -2,16 +2,26 @@ from flask import Flask, request
 import json
 import pandas
 from flask import Response
+import numpy as np
+import random
+import time
 
-db = pandas.read_csv("database.csv")
+db = pandas.read_csv("initial_database.csv")
 db.phone = db.phone.map(str)
 
 app = Flask("jsonrpc-demo")
+
+def random_pause():
+    n = 2000
+    mu, sigma = n/2, 0.3 # mean and standard deviation
+    s = np.random.normal(mu, sigma, n).tolist()[0]
+    time.sleep(random.randint(int(s-s/20), int(s+s/20))/1000)
 
 
 @app.route('/get/all')
 def getall():
     global db
+    random_pause()
     return json.loads(db.to_json(orient='records'))
 
 
@@ -19,6 +29,7 @@ def getall():
 def get_byemail():
     global db
     email = request.args.get('email')
+    random_pause()
     return Response(
         response=json.dumps(json.loads(db.loc[db['email'] == email].to_json(orient='records'))[0]),
         status=200,
@@ -30,6 +41,7 @@ def get_byemail():
 def get_byname():
     global db
     name = request.args.get('name')
+    random_pause()
     return Response(
         response=json.dumps(json.loads(db.loc[db['name'] == name].to_json(orient='records'))[0]),
         status=200,
@@ -46,6 +58,7 @@ def add():
                     "phone": body["phone"]},
                    ignore_index=True)
     db.to_csv("database.csv", index=False)
+    random_pause()
     return Response(
         response=json.dumps(json.loads(db.loc[db['email'] == body["email"]].to_json(orient='records'))[0]),
         status=200,

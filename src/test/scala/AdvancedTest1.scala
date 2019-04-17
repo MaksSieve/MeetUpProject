@@ -17,7 +17,7 @@ class AdvancedTest1 extends Simulation{
     .baseUrl("http://localhost:5000")
 
   val adds: SourceFeederBuilder[String] = csv("pools/adds.csv").random
-  val olds: SourceFeederBuilder[String] = csv("pools/olds.csv").random
+  val olds: SourceFeederBuilder[String] = csv("pools/olds.csv").circular
 
   val GetByName: HttpRequestBuilder = http("GetByName")
     .get("/get/name")
@@ -35,17 +35,20 @@ class AdvancedTest1 extends Simulation{
 
 
   val AdvancedScenario1: ScenarioBuilder = scenario("AdvancedScenario1")
-          .feed(olds)
+    .group("Open")(
+          feed(olds)
           .randomSwitch(
             50.0 -> exec(GetByEmail)
-              .doIfOrElse("${name}" == "Ivan")(feed(adds).exec(Add))(exec(GetByName)),
+              .doIf(session => session("name").as[String] == "Ivan")(feed(adds).exec(Add)),
             50.0 -> exec(GetByName)
           )
+    )
 
 
   val AdvancedScenario2: ScenarioBuilder = scenario("AdvancedScenario2")
-      .forever(
-        pace(30)
+    .group("Closed")(
+      forever(
+        pace(10)
           .feed(olds)
           .exec(GetByEmail)
           .exec(GetByName)
@@ -61,21 +64,22 @@ class AdvancedTest1 extends Simulation{
           })
           .exec(Add)
       )
+    )
 
   setUp(
     AdvancedScenario1.inject(
       incrementUsersPerSec(1) // Double
         .times(5)
-        .eachLevelLasting(30 seconds)
-        .separatedByRampsLasting(10 seconds)
-        .startingFrom(0) // Double
+        .eachLevelLasting(10 seconds)
+        .separatedByRampsLasting(5 seconds)
+        .startingFrom(5) // Double
     ).protocols(httpConf),
     AdvancedScenario2.inject(
       incrementConcurrentUsers(1) // Int
         .times(5)
-        .eachLevelLasting(30 seconds)
-        .separatedByRampsLasting(10 seconds)
-        .startingFrom(0) // Int
+        .eachLevelLasting(10 seconds)
+        .separatedByRampsLasting(5 seconds)
+        .startingFrom(5) // Int
     ).protocols(httpConf)
-  ).maxDuration(5 minutes)
+  ).maxDuration(1.5 minute)
 }
