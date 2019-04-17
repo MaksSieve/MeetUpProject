@@ -27,6 +27,7 @@ class AdvancedTest1 extends Simulation{
     .get("/get/email")
     .queryParam("email", "${email}")
     .check(jsonPath("$.name") saveAs "name")
+    .check(jsonPath("$.email") is "${email}")
 
   val Add: HttpRequestBuilder = http("Add")
     .post("/add")
@@ -34,20 +35,12 @@ class AdvancedTest1 extends Simulation{
 
 
   val AdvancedScenario1: ScenarioBuilder = scenario("AdvancedScenario1")
-      .randomSwitch(
-        0.01 -> feed(adds).exec(Add),
-        99.99 -> exec(
-          feed(olds)
+          .feed(olds)
           .randomSwitch(
-            50.0 -> exec(GetByEmail).doIf("${name}" == "Ivan")(feed(adds).exec(Add)),
-            50.0 -> exec(GetByName).randomSwitch(
-              30.0 -> exec(GetByEmail).randomSwitch(
-                20.0 -> feed(adds).exec(Add)
-              )
-            )
+            50.0 -> exec(GetByEmail)
+              .doIfOrElse("${name}" == "Ivan")(feed(adds).exec(Add))(exec(GetByName)),
+            50.0 -> exec(GetByName)
           )
-        )
-      )
 
 
   val AdvancedScenario2: ScenarioBuilder = scenario("AdvancedScenario2")
