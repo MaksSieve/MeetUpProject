@@ -70,15 +70,15 @@ class AdvancedTest1 extends Simulation{
     AdvancedScenario1.inject(
       incrementUsersPerSec(1) // Double
         .times(5)
-        .eachLevelLasting(10 seconds)
-        .separatedByRampsLasting(5 seconds)
+        .eachLevelLasting(8 seconds)
+        .separatedByRampsLasting(4 seconds)
         .startingFrom(5) // Double
     ).protocols(httpConf),
     AdvancedScenario2.inject(
       incrementConcurrentUsers(1) // Int
         .times(5)
-        .eachLevelLasting(10 seconds)
-        .separatedByRampsLasting(5 seconds)
+        .eachLevelLasting(8 seconds)
+        .separatedByRampsLasting(4 seconds)
         .startingFrom(5) // Int
     ).protocols(httpConf)
   ).maxDuration(1 minute)
