@@ -48,7 +48,7 @@ class AdvancedTest1 extends Simulation{
   val AdvancedScenario2: ScenarioBuilder = scenario("AdvancedScenario2")
     .group("Closed")(
       forever(
-        pace(10)
+        pace(2)
           .feed(olds)
           .exec(GetByEmail)
           .exec(GetByName)
@@ -81,7 +81,7 @@ class AdvancedTest1 extends Simulation{
         .separatedByRampsLasting(5 seconds)
         .startingFrom(5) // Int
     ).protocols(httpConf)
-  ).maxDuration(1.5 minute)
+  ).maxDuration(1 minute)
     .assertions(
       forAll.failedRequests.percent.lt(5.0),
       details("Closed").responseTime.percentile(.95).lt(1500),
