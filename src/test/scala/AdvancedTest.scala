@@ -8,7 +8,7 @@ import io.gatling.http.request.builder.HttpRequestBuilder
 import scala.concurrent.duration._
 import scala.util.Random
 
-class AdvancedTest1 extends Simulation{
+class AdvancedTest extends Simulation{
 
   val httpConf:HttpProtocolBuilder = http
     .check(status in 200)
