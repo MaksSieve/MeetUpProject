@@ -17,9 +17,9 @@
     </appender>
 
 
-    <logger name="com.`excilys.ebi.gatling.http" level="TRACE" />
+    <logger name="com.`excilys.ebi.gatling.http" level="DEBUG" />
 
-    <root level="TRACE">
+    <root level="DEBUG">
         <appender-ref ref="FILE" />
     </root>
 
